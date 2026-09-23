@@ -1,0 +1,56 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# uv
+.uv-cache/
+
+# Testing / linting / typing caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environment / secrets
+.env
+.env.*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+
+# Project data & artifacts (raw/cached crawl output, trained models, logs)
+data/raw/
+data/cache/
+data/*.db
+data/*.sqlite*
+artifacts/
+checkpoints/
+*.pt
+*.pth
+wandb/
+mlruns/
+
+# Plots generated during experimentation
+*.png
+!notes/**/*.png
