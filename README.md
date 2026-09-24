@@ -1,8 +1,8 @@
 # scratch-rag
 
-**A retrieval-augmented generation system with nothing borrowed.** No LangChain, no Hugging Face, no FAISS, no pretrained weights. Every layer — BPE tokenizer, chunker, TF-IDF/BM25, word2vec embeddings, ANN index, hybrid retriever, and a tiny GPT — is implemented from first principles.
+**A practical, well-evaluated retrieval-augmented generation system.** The retrieval stack (tokenizer, chunker, TF-IDF/BM25, word2vec embeddings, ANN index, hybrid retriever) is built with standard libraries, focused on correct system design and rigorous evaluation. The generator — a tiny GPT — is still hand-built from first principles with raw PyTorch tensors and autograd, since that's the part where understanding the internals is the actual point.
 
-The goal isn't answer quality. It's proof that every layer of a RAG stack can be built and measured by hand.
+The goal isn't answer quality for its own sake. It's a correctly engineered, measurable RAG pipeline, with the one component (the generator) built and understood from the ground up rather than imported.
 
 [![Python](https://img.shields.io/badge/python-3.13-blue?logo=python&logoColor=white)](https://www.python.org/)
 [![Build system](https://img.shields.io/badge/build-uv-de5fe9)](https://docs.astral.sh/uv/)
@@ -11,20 +11,31 @@ The goal isn't answer quality. It's proof that every layer of a RAG stack can be
 
 ---
 
-## Why "from scratch"
+## Library policy
 
-Off-the-shelf RAG stacks hide the interesting parts behind a `.retrieve()` call. This project puts them back:
+Most of the retrieval stack leans on standard tools — the skill being proven there is system design and evaluation rigor, not reimplementing well-trodden algorithms. The generator is the exception: it stays hand-built, since understanding transformer internals is the actual point of that stage.
+
+| Stage | Approach |
+|---|---|
+| Tokenizer | Library-based (NLTK) |
+| Chunking | Practical engineering |
+| Sparse retrieval (TF-IDF / BM25) | scikit-learn |
+| Dense embeddings (word2vec) | gensim |
+| ANN / hybrid index | Undecided — see note below |
+| Generator (tiny GPT) | From scratch, PyTorch tensors + autograd only |
 
 | Allowed | Forbidden |
 |---|---|
-| Python standard library | LangChain, LlamaIndex |
-| NumPy | Hugging Face, scikit-learn, gensim |
-| PyTorch tensors + autograd, `nn.Parameter`, `nn.Linear`, `nn.Embedding`, `torch.optim` | NLTK / spaCy tokenizers |
-| `mps` device | FAISS |
-| matplotlib (for plots) | `nn.Transformer*`, `nn.MultiheadAttention`, `F.scaled_dot_product_attention` |
-| | Pretrained weights or external LLM APIs |
+| Python standard library | LangChain, LlamaIndex (orchestration frameworks) |
+| NumPy, pandas | Hugging Face (transformers/tokenizers/pretrained models) |
+| scikit-learn, gensim, NLTK | Pretrained weights or external LLM APIs |
+| PyTorch tensors + autograd, `nn.Parameter`, `nn.Linear`, `nn.Embedding`, `torch.optim` (generator only) | `nn.Transformer*`, `nn.MultiheadAttention`, `F.scaled_dot_product_attention` |
+| `mps` device | |
+| matplotlib (for plots) | |
 
-If a component needs math, it gets derived and coded here — not imported.
+> **Note:** FAISS is still forbidden pending a decision on Checkpoint 5 (ANN index) — not yet discussed.
+
+The generator is still where the math gets derived and coded by hand. Everything upstream of it is about assembling the pieces correctly and proving they work with real evaluation numbers (Recall@k, MRR) rather than just "it ran."
 
 ## Architecture
 
@@ -51,7 +62,7 @@ Roughly 15–17 weeks at ~10 hours/week. The first demo-ready system lands at th
 | # | Checkpoint | Est. weeks | Deliverable | Status |
 |---|---|---|---|---|
 | 0 | Setup + corpus | 1 | Repo skeleton, 2–10 MB clean domain corpus | 🔄 In progress |
-| 1 | Text processing + BPE | 1.5 | Trained tokenizer with encode/decode round-trip | ⬜ Not started |
+| 1 | Text processing + tokenization | 1.5 | Corpus tokenized with NLTK's word tokenizer, vocab + encode/decode round-trip | ⬜ Not started |
 | 2 | Chunking | 1 | Fixed + sentence-aware chunkers, chunk stats | ⬜ Not started |
 | 3 | Sparse retrieval + eval | 2 | TF-IDF, BM25, labeled question set, Recall@k/MRR | ⬜ Not started |
 | 4 | Dense embeddings | 2 | word2vec (SGNS) + SIF sentence vectors | ⬜ Not started |
